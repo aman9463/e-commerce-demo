@@ -1,7 +1,7 @@
 class Api::ProductsController < ApplicationController
 	include CustomExceptionHandler
 	include CommonConcern
-	
+
 	def lists
 		if params[:search].present?
 			products = Product.where("name LIKE :name", name: "%#{params[:search]}%")
@@ -10,7 +10,8 @@ class Api::ProductsController < ApplicationController
 			else
 				attr_ids =[]
 			end
-			render json: products, attr_ids: attr_ids
+			pr = products.paginate(page: params[:page] || 1, per_page: 10)
+			render json: pr, attr_ids: attr_ids
 		else
 			@products = Product.all.paginate(page: params[:page] || 1, per_page: 10)
 			not_variant_pr =  Product.joins("INNER JOIN variants ON variants.product_id != products.id").uniq
